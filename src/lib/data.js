@@ -140,9 +140,9 @@ export const categories = [
   ];
   
   export const currentUser = {
-    name: "Issa",
+    name: "Bilal",
     role: "doctor",
-    email: "issabaloach03@gmail.com",
+    email: "bilal@gmail.com",
   };
   
   export const appointments = [
