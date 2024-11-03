@@ -22,7 +22,7 @@ export default function HeroSection() {
           <div className="flex gap-4 justify-center">
             <Button variant="outline">Find Doctor You Need</Button>
             <Link href={"/doctors/apply"}>
-              <Button>Apply as Doctor</Button>
+            <Button>Apply as a Doctor</Button>
             </Link>
           </div>
         </div>
