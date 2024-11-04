@@ -3,6 +3,7 @@ import Image from "next/image";
 import { HomeIcon, ClockIcon, PlusCircledIcon, MagicWandIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/DatePicker";
+import Link from "next/link";
 
 
 export default function DoctorDetail({ params }) {
@@ -13,7 +14,9 @@ export default function DoctorDetail({ params }) {
     return (
         <div className="min-h-screen">
             <div className="container  py-10 mx-auto">
+           
                 <div className="lg:w-4/5 mx-auto flex flex-wrap">
+              
                     <div className="lg:w-1/2 relative w-full lg:h-auto h-64 object-cover object-center rounded">
                         <Image
                             fill={true}
