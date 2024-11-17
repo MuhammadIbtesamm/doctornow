@@ -1,12 +1,12 @@
 import connectDB from "@/lib/connectDB";
-import { UserModal } from "@/lib/models/UserModal";
+import { UserModel } from "@/lib/models/UserModel";
 
-export async function POST(req) {
+export async function  POST(req) {
   await connectDB();
   try {
     const obj = await req.json();
 
-    let newUser = await new UserModal({ ...obj });
+    let newUser = await new UserModel({ ...obj });
     newUser = await newUser.save();
 
     return Response.json(
@@ -30,7 +30,7 @@ export async function POST(req) {
 
 export async function GET(req) {
   await connectDB();
-  const users = await UserModal.find();
+  const users = await UserModel.find();
   return Response.json(
     {
       error: false,
