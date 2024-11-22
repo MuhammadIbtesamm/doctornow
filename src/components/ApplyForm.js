@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import React from "react";
 import {
   Select,
   SelectContent,
@@ -25,26 +24,24 @@ import {
   SelectValue,
 } from "./ui/select";
 import { addRequest } from "@/actions/requests";
-import { useToast } from "@/hooks/use-toast"
-
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  name: z.string().min(2).max(50),
-  bio: z.string().min(2).max(120),
-  hospital: z.string().min(2).max(50),
-  days: z.array(z.string()).min(1, "Select at least one day"),
-  fees: z.string(),
-  gender: z.string(),
-  appointmentTime: z.string(),
-  degree: z.string(),
-  specialization: z.string(),
-  experience: z.string(),
-  number: z.string().regex(/^\d+$/, "Enter a valid phone number"),
-  address: z.string().min(5),
+  bio: z.string().min(1, "Bio is required"),
+  hospital: z.string().min(1, "Hospital is required"),
+  fees: z.string().min(1, "Fees is required"),
+  gender: z.string().min(1, "Gender is required"),
+  appointmentTime: z.string().min(1, "Appointment time is required"),
+  degree: z.string().min(1, "Degree is required"),
+  specialization: z.string().min(1, "Specialization is required"),
+  experience: z.string().min(1, "Experience is required"),
+  number: z.string().min(1, "Contact number is required"),
+  address: z.string().min(1, "Address is required"),
 });
 
-export default function DoctorForm ({ session }) {
-  const {toast} = useToast();
+// Accept only the necessary session data as props
+export default function DoctorForm({ session }) {
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,31 +58,42 @@ export default function DoctorForm ({ session }) {
     },
   });
 
-
   async function onSubmit(values) {
-    console.log(values);
-    values.user = session.user._id
-    const response = await addRequest(values)
-    console.log("response" , response)
-    if (response.error) {
-      form.reset();
+    try {
+     
+      console.log(values);
+      values.user = session.user._id;
+      console.log("values=>", values);
+      const response = await addRequest(values);
+      console.log("response=>", response);
+
+      if (response.error) {
+        toast({
+          title: "Sorry, your application cannot be submitted.",
+          description: response.msg,
+          variant: "destructive",
+        });
+      } else {
+        form.reset();
+        toast({
+          title: "Your application is submitted.",
+          description: "You will be informed by email in 3 business days.",
+          variant: "default",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Sorry , Your application cannot be submitted.",
-        description: response.msg,
-      });
-    } else {
-      form.reset();
-      toast({
-        title: "Your application is submitted.",
-        description: "You will be informed by email in 3 business days.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
     }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-5">
-
+        <div className="grid grid-cols-1 m-2 lg:grid-cols-2 gap-5">
           <FormField
             name="hospital"
             control={form.control}
@@ -119,9 +127,21 @@ export default function DoctorForm ({ session }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gender</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter gender" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -196,8 +216,6 @@ export default function DoctorForm ({ session }) {
             )}
           />
 
-        
-
           <FormField
             name="address"
             control={form.control}
@@ -227,8 +245,9 @@ export default function DoctorForm ({ session }) {
           )}
         />
 
-
-        <Button type="submit">{form.formState.isSubmitting ? "Loading" : "Submit"}</Button>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Loading..." : "Submit"}
+        </Button>
       </form>
     </Form>
   );

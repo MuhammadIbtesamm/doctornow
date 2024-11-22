@@ -1,10 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import { number } from "prop-types";
+import mongoose from "mongoose";
 
-
-
-
-
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     firstName: String,
@@ -13,14 +9,14 @@ const userSchema = new Schema({
     picture: String,
     role: { type: String, default: "user", enum: ["user", "doctor", "admin"] },
     extraInfo: {
-      fees: Number,
-      hospital: String,
-      time: String,
-      bio: String,
-      specialization: String,
-      gender: String,
+        fees: Number,
+        hospital: String,
+        time: String,
+        bio: String,
+        specialization: String,
+        gender: String,
     },
-  });
+});
 
-  export const UserModel =
-  mongoose.models.Users || mongoose.model("Users", userSchema);
+export const UserModel =
+    mongoose.models.Users || mongoose.model("Users", userSchema);
