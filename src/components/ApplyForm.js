@@ -57,38 +57,44 @@ export default function DoctorForm({ session }) {
       address: "",
     },
   });
+  
 
   async function onSubmit(values) {
     try {
-     
-      console.log(values);
+      if (!session || !session.user || !session.user._id) {
+        throw new Error("Session or user information is missing.");
+      }
+  
       values.user = session.user._id;
-      console.log("values=>", values);
+  
       const response = await addRequest(values);
-      console.log("response=>", response);
+  
+        
 
       if (response.error) {
         toast({
-          title: "Sorry, your application cannot be submitted.",
-          description: response.msg,
-          variant: "destructive",
+          title: "Submission Failed",
+          description: response.msg || "An error occurred.",
+          variant: "destructive"
         });
       } else {
         form.reset();
         toast({
-          title: "Your application is submitted.",
+          title: "Application Submitted",
           description: "You will be informed by email in 3 business days.",
           variant: "default",
         });
       }
     } catch (error) {
+      console.error("Error during submission:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     }
   }
+  
 
   return (
     <Form {...form}>

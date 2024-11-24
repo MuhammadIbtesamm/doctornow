@@ -1,10 +1,24 @@
 import connectDB from "@/lib/connectDB";
 import { RequestModel } from "@/lib/models/RequestModel";
 
-export async function  POST(req) {
+export async function POST(req) {
   await connectDB();
   try {
     const obj = await req.json();
+
+    const isUserRequestedBefore = await RequestModel.findOne({
+      user: obj.user,
+    });
+
+if (isUserRequestedBefore){
+  return Response.json(
+    {
+      error: true,
+      msg: "Already Registered from This ID",
+    },
+    { status: 403 }
+  );
+}
 
     let newRequest = await new RequestModel({ ...obj });
     newRequest = await newRequest.save();
