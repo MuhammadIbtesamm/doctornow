@@ -21,12 +21,12 @@ const DoctorCard = ({ request, isAdmin, onAccept, onReject }) => (
       <Avatar className="h-10 w-10">
         <AvatarImage src={request.user.picture} alt={request.user.firstName} />
         <AvatarFallback>
-          {request.user.firstName.charAt(0)}
-          {request.user.lastName?.charAt(0)}
+          {request.user?.firstName?.charAt(0) || ""}
+          {request.user?.lastName?.charAt(0)  || ""}
         </AvatarFallback>
       </Avatar>
       <div>
-        <CardTitle>{`${request.user.firstName} ${
+        <CardTitle>{`${request.user?.firstName} ${
           request.user.lastName || ""
         }`}</CardTitle>
         <CardDescription className="capitalize">

@@ -15,12 +15,12 @@ export async function addRequest(data) {
       throw new Error("Failed to submit request.");
     }
   
-    return await response.json(); // Ensure this returns a plain object
+    return await response.json();
   }
   
   export async function getRequest(status) {
     let requests = await fetch(
-      `${process.env.BASE_URL}api/requests?status=${status ? status : ""}`
+      `${process.env.BASE_URI}api/requests?status=${status ? status : ""}`
     );
     requests = requests.json();
   
@@ -28,14 +28,14 @@ export async function addRequest(data) {
   }
   
   export async function getSingleRequest(id) {
-    let request = await fetch(`${process.env.BASE_URL}api/requests/${id}`);
+    let request = await fetch(`${process.env.BASE_URI}api/requests/${id}`);
     request = request.json();
   
     return request;
   }
   
   export async function updateRequest(id, status) {
-    let requests = await fetch(`${process.env.BASE_URL}api/requests`, {
+    let requests = await fetch(`${process.env.BASE_URI}api/requests`, {
       method: "PUT",
       body: JSON.stringify({ id, status }),
     });

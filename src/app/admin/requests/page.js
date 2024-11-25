@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "../../../../auth";
 import { getRequest } from "@/actions/requests";
+import DoctorRequests from "@/components/RequestSection";
 
 export default async function Requests({ searchParams }) {
 
