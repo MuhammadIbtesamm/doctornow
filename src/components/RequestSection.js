@@ -1,16 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,10 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { HomeIcon, PlusIcon, ClockIcon, CheckIcon, XIcon } from "lucide-react";
-import DoctorDetailSheet from "./DoctorDetailSheet";
 import { updateRequest } from "@/actions/requests";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import DoctorCard from "./DoctorCard";
 

@@ -24,6 +24,7 @@ export default async function Header() {
               <MenubarTrigger className={"border-none bg-transparent p-0 m-0"}>
                 <Image
                   src={session?.user?.image}
+                  alt= "user profile pic"
                   height={40}
                   width={40}
                   className="rounded-full"

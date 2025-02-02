@@ -15,7 +15,7 @@ import SignIn from "@/app/signin/page";
             DOCTOR APPOINTMENT SYSTEM
           </h1>
           <p className="mb-8 leading-relaxed">
-            Book your doctor's appointment or Apply as a Doctor in just a few clicks!
+            Book your doctor appointment or Apply as a Doctor in just a few clicks!
              With DoctorNow,
             connecting to qualified medical professionals has never been easier.
             Whether you need a routine checkup or specialized care, find the

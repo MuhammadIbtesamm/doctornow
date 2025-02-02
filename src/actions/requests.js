@@ -19,14 +19,28 @@ export async function addRequest(data) {
   }
   
   export async function getRequest(status) {
-    let requests = await fetch(
-      `${process.env.BASE_URI}api/requests?status=${status ? status : ""}`
-    );
-    requests = requests.json();
+    try {
+      // Fetch data from the API
+      const response = await fetch(
+        `${process.env.BASE_URI}api/requests?status=${status ? status : ""}`
+      );
   
-    return requests;
+      // Check if the response is OK (status code 200-299)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Parse the JSON data
+      const data = await response.json();
+  
+      // Return the parsed data
+      return data;
+    } catch (error) {
+      // Handle any errors that occur during the fetch or JSON parsing
+      console.error("Error in getRequest:", error);
+      return { requests: [] }; 
+    }
   }
-  
   export async function getSingleRequest(id) {
     let request = await fetch(`${process.env.BASE_URI}api/requests/${id}`);
     request = request.json();
