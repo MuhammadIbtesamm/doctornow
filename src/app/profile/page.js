@@ -1,97 +1,76 @@
-"use client"
+import { auth, signOut } from "../../../auth"
+import { redirect } from "next/navigation"
+import Image from "next/image"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Loader } from "lucide-react"
+export default async function ProfilePage() {
+  const session = await auth()
 
-export default function ProfilePage() {
-  const [user, setUser] = useState(null)
-  const [appointments, setAppointments] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const userResponse = await fetch("api/users")
-        if (!userResponse.ok) throw new Error(`User API error: ${userResponse.status}`)
-        const userData = await userResponse.json()
-        setUser(userData)
-
-        const appointmentsResponse = await fetch("api/appointment")
-        if (!appointmentsResponse.ok) throw new Error(`Appointments API error: ${appointmentsResponse.status}`)
-        const appointmentsData = await appointmentsResponse.json()
-        setAppointments(appointmentsData)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-        setError("Failed to load data. Please try again later.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader className="animate-spin" />
-      </div>
-    )
-  if (error) return <div className="text-center text-red-500">{error}</div>
+  if(session) redirect('/')
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      {/* User Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center space-x-4">
-          <Avatar>
-            <AvatarImage src={user?.image} alt={user?.name} />
-            <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="text-lg font-semibold">{user?.name}</h2>
-            <p className="text-gray-500">{user?.email}</p>
+    <div className="min-h-screen bg-gray-100">
+      <Header 
+        title="Profile" 
+        description="Manage your personal information" 
+      />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
+          <div className="p-8 border-b border-gray-200 flex justify-between items-center">
+            <div className="flex items-center space-x-6">
+              <Image 
+                src={session.user.image || '/default-avatar.png'}
+                alt={session.user.name || 'User Profile'}
+                width={120}
+                height={120}
+                className="rounded-full border-4 border-gray-200 object-cover"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">{session.user.name}</h1>
+                <p className="text-lg text-gray-500 mt-2">{session.user.email}</p>
+              </div>
+            </div>
+            <form
+                  action={async () => {
+                    "use server";
+                    await signOut("google");
+                  }}
+                >
+                 <Button variant={"outline"}> LogOut</Button>
+                </form>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Appointments Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Appointments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {appointments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.map((appointment) => (
-                  <TableRow key={appointment.id}>
-                    <TableCell>{appointment.date}</TableCell>
-                    <TableCell>{appointment.time}</TableCell>
-                    <TableCell>{appointment.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p>No appointments scheduled.</p>
-          )}
-        </CardContent>
-      </Card>
+          
+          <div className="p-8">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">Personal Details</h2>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    <span className="font-medium">Full Name:</span> {session.user.name}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Email:</span> {session.user.email}
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">Account Settings</h2>
+                <div className="space-y-2">
+                  <p className="text-gray-600">
+                    <span className="font-medium">Joined:</span> {new Date().toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Last Login:</span> {new Date().toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
-
