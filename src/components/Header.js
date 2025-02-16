@@ -11,7 +11,6 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { auth, signOut } from "../../auth";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 export default async function Header() {
   const session = await auth();
@@ -45,9 +44,10 @@ export default async function Header() {
                 <form
                   action={async () => {
                     "use server";
+                    console.log("Signing out...");
                     await signOut({
-                      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/signin`,
-                      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/signin`
+                      redirect: true,
+                      redirectTo: "/signin"
                     });
                   }}
                 >
