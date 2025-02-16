@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { auth, signOut } from "../../auth";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default async function Header() {
   const session = await auth();
@@ -44,7 +45,10 @@ export default async function Header() {
                 <form
                   action={async () => {
                     "use server";
-                    await signOut("google");
+                    await signOut({
+                      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/signin`,
+                      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/signin`
+                    });
                   }}
                 >
                  <Button variant={"outline"}> LogOut</Button>
