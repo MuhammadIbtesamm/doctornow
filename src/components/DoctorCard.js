@@ -3,116 +3,67 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
-import { HomeIcon, PlusIcon, ClockIcon, CheckIcon, XIcon } from "lucide-react";
-import DoctorDetailSheet from "./DoctorDetailSheet";
+import Image from "next/image";
 import Link from "next/link";
+import DoctorDetailSheet from "./DoctorDetailSheet";
 
-const DoctorCard = ({ request, isAdmin, onAccept, onReject }) => (
-  <Card key={request._id}>
-    <CardHeader className="flex flex-row items-center space-x-4">
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={request.user.picture} alt={request.user.firstName} />
-        <AvatarFallback>
-          {request.user?.firstName?.charAt(0) || ""}
-          {request.user?.lastName?.charAt(0)  || ""}
-        </AvatarFallback>
-      </Avatar>
-      <div>
-        <CardTitle>{`${request.user?.firstName} ${
-          request.user.lastName || ""
-        }`}</CardTitle>
-        <CardDescription className="capitalize">
-          {request.specialization}
-        </CardDescription>
-      </div>
-    </CardHeader>
+const DoctorCard = ({ doctor, showAppointmentButton = false }) => {
+  if (!doctor) return null;
 
-    <CardContent>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <HomeIcon className="h-4 w-4" />
-            <span className="font-semibold">Gender</span>
-          </div>
-          <span>{request.gender}</span>
+  return (
+    <Card className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex items-center space-x-4">
+        <div className="relative w-20 h-20">
+          <DoctorDetailSheet doctor={doctor}>
+            <Image
+              src={doctor.image || "/default-avatar.png"}
+              alt={`Dr. ${doctor.firstname} ${doctor.lastname}`}
+              width={80}
+              height={80}
+              className="rounded-full object-cover cursor-pointer"
+              priority
+            />
+          </DoctorDetailSheet>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <PlusIcon className="h-4 w-4" />
-            <span className="font-semibold">Hospital</span>
-          </div>
-          <span>{request.hospital}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <ClockIcon className="h-4 w-4" />
-            <span className="font-semibold">Appointment Time</span>
-          </div>
-          <span>{request.appointmentTime}</span>
-        </div>
-      </div>
-    </CardContent>
-
-    <CardFooter className="justify-between">
-      <DoctorDetailSheet doctor={request} />
-      {isAdmin ? (
         <div>
-          {request.status === "rejected" ? (
-            <Button
-              size="icon"
-              variant="outline"
-              className="bg-red-50 hover:bg-red-100 text-red-600"
-            >
-              <XIcon className="h-4 w-4" />
-              <span className="sr-only">Rejected doctor request</span>
-            </Button>
-          ) : request.status === "accepted" ? (
-            <Button
-              size="icon"
-              variant="outline"
-              className="bg-green-50 hover:bg-green-100 text-green-600"
-            >
-              <CheckIcon className="h-4 w-4" />
-              <span className="sr-only">Accepted doctor request</span>
-            </Button>
-          ) : (
-            <div className="space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                className="bg-green-50 hover:bg-green-100 text-green-600"
-                onClick={onAccept}
-              >
-                <CheckIcon className="h-4 w-4" />
-                <span className="sr-only">Accept doctor request</span>
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                className="bg-red-50 hover:bg-red-100 text-red-600"
-                onClick={onReject}
-              >
-                <XIcon className="h-4 w-4" />
-                <span className="sr-only">Reject doctor request</span>
-              </Button>
+          <DoctorDetailSheet doctor={doctor}>
+            <div className="cursor-pointer">
+              <h3 className="text-xl font-semibold">
+                Dr. {doctor.firstname} {doctor.lastname}
+              </h3>
+              <p className="text-gray-600">{doctor.specialization}</p>
             </div>
-          )}
+          </DoctorDetailSheet>
         </div>
-      ) : (
-        <Link href={`/doctors/${request._id}`}>
-          <Button>Book Appointment</Button>
+      </div>
+
+      <CardContent className="mt-4 space-y-2 px-0">
+        <p className="text-gray-700">
+          <span className="font-medium">Experience:</span> {doctor.experience} years
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Consultation Fee:</span> ${doctor.consultationFee}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Hospital:</span> {doctor.hospital}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Available Time:</span> {doctor.appointmentTime}
+        </p>
+      </CardContent>
+
+      <CardFooter className="px-0 pt-4">
+        <Link href={`/doctors/${doctor.id}`} className="w-full">
+          <Button className="w-full">
+            {showAppointmentButton ? "Book Appointment" : "View Profile"}
+          </Button>
         </Link>
-      )}
-    </CardFooter>
-  </Card>
-);
+      </CardFooter>
+    </Card>
+  );
+};
 
 export default DoctorCard;

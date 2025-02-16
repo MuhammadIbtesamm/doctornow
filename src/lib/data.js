@@ -1,3 +1,6 @@
+import connectDB from "./connectDB";
+import { UserModel } from "./models/UserModel";
+
 export const categories = [
     "Allergist/Immunologist",
     "Anesthesiologist",
@@ -277,4 +280,161 @@ export const categories = [
       },
     },
   ];
+  
+// Update the staticDoctors array
+const staticDoctors = doctors.map((doc, index) => ({
+  id: doc.id,
+  name: doc.name,
+  firstname: doc.name.split(' ')[1],
+  lastname: doc.name.split(' ')[2] || '',
+  picture: '/default-avatar.png',
+  specialization: doc.category,
+  experience: '5+',
+  consultationFee: doc.fees,
+  hospital: doc.hospital,
+  availableDays: ['Monday', 'Wednesday', 'Friday'],
+  about: `Experienced ${doc.category} at ${doc.hospital}`,
+  appointmentTime: doc.appointmentTime,
+  gender: doc.gender,
+  isApproved: true,
+  role: 'doctor'
+}));
+
+export async function getDoctors() {
+  try {
+    await connectDB();
+    // Get all approved doctors from the database
+    const dbDoctors = await UserModel.find({ 
+      role: "doctor", 
+      isApproved: true 
+    });
+
+    // Transform database doctors to match the required format
+    const formattedDbDoctors = dbDoctors.map(doc => ({
+      _id: doc._id.toString(),
+      firstname: doc.firstname || doc.firstName,
+      lastname: doc.lastname || doc.lastName,
+      picture: doc.picture,
+      specialization: doc.specialization,
+      experience: doc.experience || '0',
+      consultationFee: doc.consultationFee || 0,
+      hospital: doc.hospital || 'Not specified',
+      availableDays: doc.availableDays || ['Monday', 'Wednesday', 'Friday'],
+      about: doc.about || `${doc.specialization} specialist`,
+      appointmentTime: doc.appointmentTime || '9:00 AM - 5:00 PM',
+      gender: doc.gender,
+      isApproved: true,
+      role: 'doctor'
+    }));
+    
+    // Combine database doctors with static doctors
+    // Use static doctors only if no database doctors exist
+    const allDoctors = formattedDbDoctors.length > 0 
+      ? formattedDbDoctors 
+      : staticDoctors;
+
+    return allDoctors;
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    return staticDoctors; // Fallback to static data if database fails
+  }
+}
+
+export async function getDoctorById(id) {
+  try {
+    await connectDB();
+    const doctor = await UserModel.findOne({ 
+      _id: id, 
+      role: "doctor", 
+      isApproved: true 
+    });
+    
+    if (doctor) {
+      // Format database doctor
+      return {
+        _id: doctor._id.toString(),
+        firstname: doctor.firstname || doctor.firstName,
+        lastname: doctor.lastname || doctor.lastName,
+        picture: doctor.picture,
+        specialization: doctor.specialization,
+        experience: doctor.experience || '0',
+        consultationFee: doctor.consultationFee || 0,
+        hospital: doctor.hospital || 'Not specified',
+        availableDays: doctor.availableDays || ['Monday', 'Wednesday', 'Friday'],
+        about: doctor.about || `${doctor.specialization} specialist`,
+        appointmentTime: doctor.appointmentTime || '9:00 AM - 5:00 PM',
+        gender: doctor.gender,
+        isApproved: true,
+        role: 'doctor'
+      };
+    }
+    
+    // If not found in database, look in static data
+    const staticDoctor = staticDoctors.find(doc => doc.id.toString() === id);
+    return staticDoctor || null;
+  } catch (error) {
+    console.error("Error fetching doctor:", error);
+    // Look in static data as fallback
+    const staticDoctor = staticDoctors.find(doc => doc.id.toString() === id);
+    return staticDoctor || null;
+  }
+}
+
+export async function applyForDoctor(userId, doctorData) {
+  try {
+    await connectDB();
+    // Update user to become a doctor
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        role: "doctor",
+        isApproved: false, // Requires admin approval
+        specialization: doctorData.specialization,
+        experience: doctorData.experience,
+        consultationFee: doctorData.consultationFee,
+        hospital: doctorData.hospital,
+        availableDays: doctorData.availableDays || ['Monday', 'Wednesday', 'Friday'],
+        about: doctorData.about,
+        appointmentTime: doctorData.appointmentTime,
+        gender: doctorData.gender
+      },
+      { new: true }
+    );
+    return JSON.parse(JSON.stringify(updatedUser));
+  } catch (error) {
+    console.error("Error applying for doctor:", error);
+    return null;
+  }
+}
+
+// Add function to approve doctor applications
+export async function approveDoctorApplication(userId) {
+  try {
+    await connectDB();
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { isApproved: true },
+      { new: true }
+    );
+    return JSON.parse(JSON.stringify(updatedUser));
+  } catch (error) {
+    console.error("Error approving doctor application:", error);
+    return null;
+  }
+}
+
+// Add function to get pending doctor applications
+export async function getPendingDoctorApplications() {
+  try {
+    await connectDB();
+    const pendingDoctors = await UserModel.find({ 
+      role: "doctor", 
+      isApproved: false 
+    });
+    return JSON.parse(JSON.stringify(pendingDoctors));
+  } catch (error) {
+    console.error("Error fetching pending applications:", error);
+    return [];
+  }
+}
   

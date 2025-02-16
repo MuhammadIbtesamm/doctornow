@@ -3,11 +3,13 @@ import { redirect } from "next/navigation"
 import Image from "next/image"
 import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
+import DoctorApplicationForm from "@/components/DoctorApplicationForm"
 
 export default async function ProfilePage() {
   const session = await auth()
 
   if(session) redirect('/')
+    
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -71,6 +73,13 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {session?.user?.role !== "doctor" && (
+        <div className="container mx-auto py-8">
+          <h2 className="text-xl font-semibold mb-4">Apply as Doctor</h2>
+          <DoctorApplicationForm />
+        </div>
+      )}
     </div>
   )
 }

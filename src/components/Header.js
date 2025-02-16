@@ -1,68 +1,69 @@
+"use client"
+
 import {
   Menubar,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
   MenubarSeparator,
-  MenubarShortcut,
   MenubarTrigger,
-} from "@/components/ui/menubar";
-import Link from "next/link";
-import { Button } from "./ui/button";
-import { auth, signOut } from "../../auth";
-import Image from "next/image";
+} from "@/components/ui/menubar"
+import { Button } from "@/components/ui/button"
+import { signOut, useSession } from "next-auth/react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-export default async function Header() {
-  const session = await auth();
+export default function Header() {
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const handleNavigation = (path) => {
+    router.push(path)
+  }
+
+  const handleSignOut = async () => {
+    await signOut({
+      callbackUrl: "/signin",
+    })
+  }
+
   return (
-    <div className="bg-secondary py-3">
-      <div className="flex container mx-auto justify-between">
-        <h1 className="text-xl font-bold font-mono">DoctorNow</h1>
+    <header className="bg-secondary py-3">
+      <div className="container mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <h1 onClick={() => handleNavigation("/")} className="cursor-pointer font-mono text-xl font-bold">
+            DoctorNow
+          </h1>
+        </div>
+
         {session ? (
-          <Menubar>
+          <Menubar className="border-none bg-transparent">
             <MenubarMenu>
-              <MenubarTrigger className={"border-none bg-transparent p-0 m-0"}>
+              <MenubarTrigger className="cursor-pointer focus:bg-transparent data-[state=open]:bg-transparent">
                 <Image
-                  src={session?.user?.image}
-                  alt= "user profile pic"
+                  src={session.user?.image || "/default-avatar.png"}
+                  alt="User profile"
                   height={40}
                   width={40}
                   className="rounded-full"
                 />
               </MenubarTrigger>
-              <MenubarContent>
-                <Link href={"/profile"}>
-                  <MenubarItem>Profile</MenubarItem>
-                </Link>
+              <MenubarContent align="end" className="min-w-[200px]">
+                <MenubarItem onSelect={() => handleNavigation("/profile")}>Profile</MenubarItem>
                 <MenubarSeparator />
-                <Link href={"/appointments"}>
-                  <MenubarItem>My Appointments</MenubarItem>
-                </Link>
-
+                <MenubarItem onSelect={() => handleNavigation("/appointments")}>My Appointments</MenubarItem>
                 <MenubarSeparator />
-        
-                <form
-                  action={async () => {
-                    "use server";
-                    console.log("Signing out...");
-                    await signOut({
-                      redirect: true,
-                      redirectTo: "/signin"
-                    });
-                  }}
-                >
-                 <Button variant={"outline"}> LogOut</Button>
-                </form>
-            
+                <MenubarItem onSelect={handleSignOut}>Logout</MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
         ) : (
-          <Link href={"/signin"}>
-            <Button variant={"outline"}>Signin</Button>
-          </Link>
+          <Button variant="outline" className="hover:bg-secondary" onClick={() => handleNavigation("/signin")}>
+            Sign in
+          </Button>
         )}
       </div>
-    </div>
-  );
+    </header>
+  )
 }
+

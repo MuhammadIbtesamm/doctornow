@@ -9,109 +9,83 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  EyeIcon,
-  MapPin,
-  Phone,
-  Clock,
-  Briefcase,
-  GraduationCap,
-  Stethoscope,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function DoctorDetailSheet({ doctor }) {
+const DoctorDetailSheet = ({ children, doctor }) => {
+  if (!doctor) return null;
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <button className="p-2 hover:bg-gray-100 rounded-full">
-          <EyeIcon className="h-5 w-5" />
-          <span className="sr-only">View doctor details</span>
-        </button>
+        {children}
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Doctor Details</SheetTitle>
           <SheetDescription>
-            <div className="flex flex-col items-center gap-4 mt-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage
-                  src={doctor.user.picture}
-                  alt={`${doctor.user.firstName} ${doctor.user.lastName}`}
+            <div className="space-y-4">
+              <Avatar className="w-24 h-24 mx-auto">
+                <AvatarImage 
+                  src={doctor.image || "/default-avatar.png"} 
+                  alt={`${doctor.firstname} ${doctor.lastname}`} 
                 />
                 <AvatarFallback>
-                  {doctor.user?.firstName?.charAt(0)}
-                  {doctor.user?.lastName?.charAt(0)}
+                  {doctor.firstname?.[0]}{doctor.lastname?.[0]}
                 </AvatarFallback>
               </Avatar>
               <h1 className="font-bold text-2xl text-center">
-                {`${doctor.user.firstName} ${doctor.user.lastName}`}
+                Dr. {doctor.firstname} {doctor.lastname}
               </h1>
             </div>
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Specialization:</span>{" "}
-              {doctor.specialization}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Degree:</span> {doctor.degree}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Experience:</span>{" "}
-              {doctor.experience}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Hospital:</span> {doctor.hospital}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Address:</span> {doctor.address}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Contact:</span> {doctor.number}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-gray-500" />
-            <p>
-              <span className="font-semibold">Appointment Time:</span>{" "}
-              {doctor.appointmentTime}
-            </p>
-          </div>
+
+        <div className="mt-6 space-y-6">
           <div>
-            <p className="font-semibold">Bio:</p>
-            <p className="mt-1">{doctor.bio}</p>
+            <h2 className="text-lg font-semibold mb-2">Specialization</h2>
+            <p className="text-gray-600">{doctor.specialization}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <p>
-              <span className="font-semibold">Fees:</span> ${doctor.fees}
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Experience</h2>
+            <p className="text-gray-600">{doctor.experience} years</p>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Hospital</h2>
+            <p className="text-gray-600">{doctor.hospital}</p>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Consultation Fee</h2>
+            <p className="text-gray-600">${doctor.consultationFee}</p>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Available Time</h2>
+            <p className="text-gray-600">{doctor.appointmentTime}</p>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Available Days</h2>
+            <p className="text-gray-600">
+              {doctor.availableDays?.join(", ") || "Not specified"}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <p>
-              <span className="font-semibold">Status:</span>{" "}
-              <span className="capitalize">{doctor.status}</span>
-            </p>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">About</h2>
+            <p className="text-gray-600">{doctor.about || "No information available"}</p>
           </div>
+
+          <Link href={`/doctors/${doctor._id}`} className="block">
+            <Button className="w-full">View Full Profile</Button>
+          </Link>
         </div>
       </SheetContent>
     </Sheet>
   );
-}
+};
+
+export default DoctorDetailSheet;

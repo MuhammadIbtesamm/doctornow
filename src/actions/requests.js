@@ -1,60 +1,120 @@
 "use server"
 
+import { auth } from "../../auth";
 import { revalidatePath } from "next/cache";
+import { headers } from 'next/headers';
 
 export async function addRequest(data) {
-    let  response = await fetch(`${process.env.BASE_URI}api/requests`, {
+  try {
+    const session = await auth();
+    
+    // More detailed session check
+    if (!session?.user?.email) {
+      throw new Error("Please sign in to submit your application");
+    }
+
+    const headersList = headers();
+    const host = headersList.get('host');
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    // Include session token in the request
+    const response = await fetch(`${protocol}://${host}/api/doctors/apply`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image
+      }),
+      credentials: 'include'
     });
-  
-    if (!response.ok) {
-      throw new Error("Failed to submit request.");
-    }
-  
-    return await response.json();
-  }
-  
-  export async function getRequest(status) {
-    try {
-      // Fetch data from the API
-      const response = await fetch(
-        `${process.env.BASE_URI}api/requests?status=${status ? status : ""}`
-      );
-  
-      // Check if the response is OK (status code 200-299)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
-      // Parse the JSON data
-      const data = await response.json();
-  
-      // Return the parsed data
-      return data;
-    } catch (error) {
-      // Handle any errors that occur during the fetch or JSON parsing
-      console.error("Error in getRequest:", error);
-      return { requests: [] }; 
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to submit application");
     }
+
+    revalidatePath("/profile");
+    revalidatePath("/doctors");
+    return result;
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    throw new Error(error.message || "Failed to submit application");
   }
-  export async function getSingleRequest(id) {
-    let request = await fetch(`${process.env.BASE_URI}api/requests/${id}`);
-    request = request.json();
-  
-    return request;
+}
+
+export async function getRequest(status) {
+  try {
+    const headersList = headers();
+    const host = headersList.get('host');
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    const response = await fetch(
+      `${protocol}://${host}/api/requests?status=${status || ""}`,
+      { cache: 'no-store' }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in getRequest:", error);
+    return { requests: [] }; 
   }
-  
-  export async function updateRequest(id, status) {
-    let requests = await fetch(`${process.env.BASE_URI}api/requests`, {
+}
+
+export async function getSingleRequest(id) {
+  try {
+    const headersList = headers();
+    const host = headersList.get('host');
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    const response = await fetch(
+      `${protocol}://${host}/api/requests/${id}`,
+      { cache: 'no-store' }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in getSingleRequest:", error);
+    return null;
+  }
+}
+
+export async function updateRequest(id, status) {
+  try {
+    const headersList = headers();
+    const host = headersList.get('host');
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    const response = await fetch(`${protocol}://${host}/api/requests`, {
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ id, status }),
+      cache: 'no-store'
     });
-    requests = requests.json();
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     revalidatePath("/admin/requests");
-    return requests;
+    return await response.json();
+  } catch (error) {
+    console.error("Error in updateRequest:", error);
+    throw new Error("Failed to update request");
   }
+}
 
